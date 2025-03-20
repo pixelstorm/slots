@@ -141,7 +141,7 @@ async function updateHighScoreBoard() {
             if (!allPlayers.some(p => p.name === player.name)) {
                 allPlayers.push({
                     name: player.name,
-                    score: player.biggestWin,
+                    score: player.balance,
                     timestamp: player.lastPlayed
                 });
             }
@@ -214,8 +214,8 @@ async function updateHighScoreBoard() {
             // Clear current high score board
             leaderboardBody.innerHTML = '';
             
-            // Sort players by biggest win (descending)
-            let sortedPlayers = [...players].sort((a, b) => b.biggestWin - a.biggestWin);
+            // Sort players by balance (descending)
+            let sortedPlayers = [...players].sort((a, b) => b.balance - a.balance);
             
             // Limit to max entries
             const topPlayers = sortedPlayers.slice(0, config.maxLeaderboardEntries);
@@ -238,7 +238,7 @@ async function updateHighScoreBoard() {
                 row.innerHTML = `
                     <td class="${rankClass}">${index + 1}</td>
                     <td>${player.name}${isCurrentPlayer ? ' <i class="fas fa-user"></i>' : ''}</td>
-                    <td>$${player.biggestWin}</td>
+                    <td>$${player.balance}</td>
                     <td>${formattedDate}</td>
                 `;
                 
@@ -278,7 +278,7 @@ async function updateStats() {
             if (!allPlayers.some(p => p.name === player.name)) {
                 allPlayers.push({
                     name: player.name,
-                    score: player.biggestWin,
+                    score: player.balance,
                     timestamp: player.lastPlayed
                 });
             }
@@ -328,12 +328,12 @@ async function updateStats() {
         totalPlayersElement.textContent = players.length;
         
         // Find biggest win ever
-        const biggestWinEver = Math.max(...players.map(player => player.biggestWin));
+        const biggestWinEver = Math.max(...players.map(player => player.balance));
         biggestWinEverElement.textContent = biggestWinEver;
         
         // Find most recent winner (player with a win who played most recently)
         const winnersWithDate = players
-            .filter(player => player.biggestWin > 0)
+            .filter(player => player.balance > 0)
             .sort((a, b) => new Date(b.lastPlayed) - new Date(a.lastPlayed));
         
         mostRecentWinnerElement.textContent = winnersWithDate.length > 0 ? winnersWithDate[0].name : 'None';

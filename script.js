@@ -8,10 +8,10 @@ const config = {
     visibleSymbols: 3, // Number of visible symbols in the view
     spinDuration: 2, // seconds
     initialBalance: 1000,
-    defaultBet: 10,
-    minBet: 5,
-    maxBet: 100,
-    betIncrement: 5,
+    defaultBet: 50,
+    minBet: 50,
+    maxBet: 1000,
+    betIncrement: 50,
     symbols: [
         { name: 'skull', icon: 'fa-skull', value: 10, color: 'var(--light-color)' },
         { name: 'coin', icon: 'fa-coins', value: 20, color: 'var(--gold)' },
@@ -223,7 +223,7 @@ async function savePlayerData() {
                         },
                         body: JSON.stringify({
                             name: state.currentPlayer.name,
-                            score: state.biggestWin,
+                            score: state.balance,
                             timestamp: state.currentPlayer.lastPlayed
                         })
                     });
@@ -732,7 +732,7 @@ async function updateLeaderboard() {
             if (currentPlayer && !allPlayers.some(p => p.name === currentPlayerName)) {
                 allPlayers.push({
                     name: currentPlayer.name,
-                    score: currentPlayer.biggestWin,
+                    score: currentPlayer.balance,
                     timestamp: currentPlayer.lastPlayed
                 });
             }
