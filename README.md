@@ -49,6 +49,16 @@ npm start
 6. Two matching symbols give a smaller payout
 7. View the Treasure Board to see the highest scores
 
+## Sample Data
+
+To populate the leaderboard with sample pirate data for testing purposes, run:
+
+```bash
+node seed-data.js
+```
+
+This will create sample pirates with random high scores, allowing you to see how the Treasure Board looks with multiple players.
+
 ## Game Symbols
 
 - Skull: 10x bet multiplier

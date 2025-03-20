@@ -684,71 +684,142 @@ window.addEventListener('click', (e) => {
 });
 
 // Function to update the leaderboard with the latest data
-function updateLeaderboard() {
-    // Get the latest player data from localStorage
-    const playersData = JSON.parse(localStorage.getItem('pirateSlots_players') || '[]');
-    const currentPlayerName = localStorage.getItem('pirateSlots_currentPlayer');
-    
-    console.log('Updating leaderboard with players:', playersData);
-    console.log('Current player name:', currentPlayerName);
-    
-    // Clear the existing high scores
-    highScoreBody.innerHTML = '';
-    
-    if (playersData.length === 0) {
-        // Show the "no scores" message if there are no players
-        noScoresMessage.style.display = 'block';
-        totalPlayersElement.textContent = '0';
-        biggestWinEverElement.textContent = '$0';
-        mostRecentWinnerElement.textContent = 'None';
-        return;
-    }
-    
-    // Hide the "no scores" message
-    noScoresMessage.style.display = 'none';
-    
-    // Sort players by biggest win (descending)
-    const sortedPlayers = [...playersData].sort((a, b) => b.biggestWin - a.biggestWin);
-    
-    // Get the top players to display (up to 10)
-    const topPlayers = sortedPlayers.slice(0, 10);
-    
-    // Add each player to the high score table
-    topPlayers.forEach((player, index) => {
-        const row = document.createElement('tr');
+async function updateLeaderboard() {
+    try {
+        // First, get high scores from the server API
+        const response = await fetch('/api/high-scores');
+        let serverHighScores = [];
         
-        // Highlight the current player's row
-        if (player.name === currentPlayerName) {
-            row.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+        if (response.ok) {
+            serverHighScores = await response.json();
+            console.log('Server high scores:', serverHighScores);
+        } else {
+            console.error('Failed to fetch high scores from server:', response.status);
         }
         
-        // Format the date
-        const date = new Date(player.lastPlayed);
-        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+        // Get the latest player data from localStorage as a fallback
+        const playersData = JSON.parse(localStorage.getItem('pirateSlots_players') || '[]');
+        const currentPlayerName = localStorage.getItem('pirateSlots_currentPlayer');
         
-        row.innerHTML = `
-            <td style="padding: 10px; text-align: center; color: var(--gold); font-weight: bold;">${index + 1}</td>
-            <td style="padding: 10px; text-align: center; color: white;">${player.name} ${player.name === currentPlayerName ? '<i class="fas fa-user"></i>' : ''}</td>
-            <td style="padding: 10px; text-align: center; color: var(--accent-color);">$${player.biggestWin}</td>
-            <td style="padding: 10px; text-align: center; color: white;">${formattedDate}</td>
-        `;
+        console.log('Updating leaderboard with players:', playersData);
+        console.log('Current player name:', currentPlayerName);
         
-        highScoreBody.appendChild(row);
-    });
-    
-    // Update the stats
-    totalPlayersElement.textContent = playersData.length;
-    
-    // Find the biggest win ever
-    const biggestWinEver = Math.max(...playersData.map(p => p.biggestWin));
-    biggestWinEverElement.textContent = `$${biggestWinEver}`;
-    
-    // Find the most recent winner (player with the most recent lastPlayed date)
-    const mostRecentPlayer = playersData.reduce((latest, player) => {
-        return new Date(player.lastPlayed) > new Date(latest.lastPlayed) ? player : latest;
-    }, playersData[0]);
-    
-    mostRecentWinnerElement.textContent = mostRecentPlayer.name;
+        // Clear the existing high scores
+        highScoreBody.innerHTML = '';
+        
+        // Combine server high scores with localStorage high scores
+        let allPlayers = [...serverHighScores];
+        
+        // Add current player if not already in the list
+        if (currentPlayerName) {
+            const currentPlayer = playersData.find(p => p.name === currentPlayerName);
+            if (currentPlayer && !allPlayers.some(p => p.name === currentPlayerName)) {
+                allPlayers.push({
+                    name: currentPlayer.name,
+                    score: currentPlayer.biggestWin,
+                    timestamp: currentPlayer.lastPlayed
+                });
+            }
+        }
+        
+        if (allPlayers.length === 0) {
+            // Show the "no scores" message if there are no players
+            noScoresMessage.style.display = 'block';
+            totalPlayersElement.textContent = '0';
+            biggestWinEverElement.textContent = '$0';
+            mostRecentWinnerElement.textContent = 'None';
+            return;
+        }
+        
+        // Hide the "no scores" message
+        noScoresMessage.style.display = 'none';
+        
+        // Sort players by score (descending)
+        const sortedPlayers = [...allPlayers].sort((a, b) => {
+            // For server players, use score
+            const scoreA = a.score !== undefined ? a.score : a.biggestWin;
+            const scoreB = b.score !== undefined ? b.score : b.biggestWin;
+            return scoreB - scoreA;
+        });
+        
+        // Get the top players to display (up to 10)
+        const topPlayers = sortedPlayers.slice(0, 10);
+        
+        // Add each player to the high score table
+        topPlayers.forEach((player, index) => {
+            const row = document.createElement('tr');
+            
+            // Highlight the current player's row
+            if (player.name === currentPlayerName) {
+                row.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+            }
+            
+            // Format the date
+            const timestamp = player.timestamp || player.lastPlayed || new Date().toISOString();
+            const date = new Date(timestamp);
+            const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+            
+            // Get the score (handle both server and localStorage formats)
+            const score = player.score !== undefined ? player.score : player.biggestWin;
+            
+            row.innerHTML = `
+                <td style="padding: 10px; text-align: center; color: var(--gold); font-weight: bold;">${index + 1}</td>
+                <td style="padding: 10px; text-align: center; color: white;">${player.name} ${player.name === currentPlayerName ? '<i class="fas fa-user"></i>' : ''}</td>
+                <td style="padding: 10px; text-align: center; color: var(--accent-color);">$${score}</td>
+                <td style="padding: 10px; text-align: center; color: white;">${formattedDate}</td>
+            `;
+            
+            highScoreBody.appendChild(row);
+        });
+        
+        // Update the stats
+        totalPlayersElement.textContent = allPlayers.length;
+        
+        // Find the biggest win ever
+        const biggestWinEver = Math.max(...allPlayers.map(p => p.score !== undefined ? p.score : p.biggestWin));
+        biggestWinEverElement.textContent = `$${biggestWinEver}`;
+        
+        // Find the most recent winner
+        const sortedByDate = [...allPlayers].sort((a, b) => {
+            const dateA = new Date(a.timestamp || a.lastPlayed || 0);
+            const dateB = new Date(b.timestamp || b.lastPlayed || 0);
+            return dateB - dateA;
+        });
+        
+        mostRecentWinnerElement.textContent = sortedByDate.length > 0 ? sortedByDate[0].name : 'None';
+    } catch (error) {
+        console.error('Error updating leaderboard:', error);
+        
+        // Fallback to localStorage only if there's an error
+        const playersData = JSON.parse(localStorage.getItem('pirateSlots_players') || '[]');
+        if (playersData.length > 0) {
+            // Display localStorage data only
+            highScoreBody.innerHTML = '';
+            
+            const sortedPlayers = [...playersData].sort((a, b) => b.biggestWin - a.biggestWin);
+            const topPlayers = sortedPlayers.slice(0, 10);
+            
+            topPlayers.forEach((player, index) => {
+                const row = document.createElement('tr');
+                const date = new Date(player.lastPlayed);
+                const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+                
+                row.innerHTML = `
+                    <td style="padding: 10px; text-align: center; color: var(--gold); font-weight: bold;">${index + 1}</td>
+                    <td style="padding: 10px; text-align: center; color: white;">${player.name}</td>
+                    <td style="padding: 10px; text-align: center; color: var(--accent-color);">$${player.biggestWin}</td>
+                    <td style="padding: 10px; text-align: center; color: white;">${formattedDate}</td>
+                `;
+                
+                highScoreBody.appendChild(row);
+            });
+            
+            totalPlayersElement.textContent = playersData.length;
+            const biggestWinEver = Math.max(...playersData.map(p => p.biggestWin));
+            biggestWinEverElement.textContent = `$${biggestWinEver}`;
+            mostRecentWinnerElement.textContent = sortedPlayers[0].name;
+        }
+    }
 }
 
 // Start the game when the page loads

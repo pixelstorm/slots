@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "name": "Captain Kidd",
+    "score": 4378,
+    "timestamp": "2025-03-20T05:09:36.328Z"
+  },
+  {
+    "name": "Grace O'Malley",
+    "score": 3385,
+    "timestamp": "2025-02-23T05:09:36.328Z"
+  },
+  {
+    "name": "Henry Morgan",
+    "score": 3227,
+    "timestamp": "2025-03-04T05:09:36.329Z"
+  },
+  {
+    "name": "Blackbeard",
+    "score": 2199,
+    "timestamp": "2025-03-06T05:09:36.313Z"
+  },
+  {
+    "name": "Captain Hook",
+    "score": 1378,
+    "timestamp": "2025-03-01T05:09:36.328Z"
+  },
+  {
+    "name": "Anne Bonny",
+    "score": 1333,
+    "timestamp": "2025-02-27T05:09:36.328Z"
+  },
+  {
+    "name": "Long John Silver",
+    "score": 1101,
+    "timestamp": "2025-03-03T05:09:36.328Z"
+  },
+  {
+    "name": "Calico Jack",
+    "score": 1057,
+    "timestamp": "2025-03-03T05:09:36.328Z"
+  },
+  {
+    "name": "Bartholomew Roberts",
+    "score": 920,
+    "timestamp": "2025-02-26T05:09:36.328Z"
+  },
+  {
+    "name": "Mary Read",
+    "score": 317,
+    "timestamp": "2025-03-04T05:09:36.328Z"
+  }
+]
