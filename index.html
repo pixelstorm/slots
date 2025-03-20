@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirate's Treasure Slot Machine</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- GSAP for smooth animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <!-- Howler.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Pirate's <span class="neon-text">Treasure</span></h1>
+        
+        <!-- Player Info Section -->
+        <div id="player-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div id="current-player">
+                    <span>Sailor: </span><span id="player-name">Guest</span>
+                    <button id="change-player" class="small-button"><i class="fas fa-user-edit"></i></button>
+                </div>
+                <button id="view-high-scores" class="nav-button" style="font-size: 1rem; padding: 8px 15px; background: linear-gradient(to bottom, var(--gold), var(--rum-brown)); border: none; cursor: pointer;"><i class="fas fa-trophy"></i> Treasure Board</button>
+            </div>
+        </div>
+        
+        <div id="slot-machine">
+            <div class="ship-decoration left"><i class="fas fa-anchor ship-icon"></i></div>
+            <div class="ship-decoration right"><i class="fas fa-anchor ship-icon"></i></div>
+            
+            <div class="reels-container">
+                <div class="reel" id="reel1">
+                    <div class="symbols-container"></div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="symbols-container"></div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="symbols-container"></div>
+                </div>
+            </div>
+            
+            <div class="win-line"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="balance-container">
+                <span><i class="fas fa-coins"></i> Gold: $</span><span id="balance">1000</span>
+            </div>
+            <button id="spin-button">SPIN <i class="fas fa-skull-crossbones"></i></button>
+            <div class="bet-container">
+                <button id="decrease-bet">-</button>
+                <span>Bet: $<span id="bet-amount">10</span></span>
+                <button id="increase-bet">+</button>
+            </div>
+        </div>
+        <div id="result"></div>
+    </div>
+    
+    <!-- Player Name Modal -->
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Enter Yer Name, Sailor!</h2>
+            <form id="player-form">
+                <input type="text" id="player-name-input" placeholder="Your pirate name" maxlength="20" required>
+                <button type="submit" class="modal-button">Set Sail!</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px; margin: 5% auto; max-height: 80vh; overflow-y: auto;">
+            <span class="close-leaderboard">&times;</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <button id="top-close-leaderboard-button" class="modal-button" style="font-size: 1rem; padding: 8px 15px;">Back to Ship</button>
+                <h1 style="text-align: center; color: var(--accent-color); margin: 0 auto;">Pirate's <span class="neon-text">Treasure Board</span></h1>
+                <div style="width: 120px;"></div> <!-- Spacer for balance -->
+            </div>
+            
+            <div style="background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                <h2 style="text-align: center; color: var(--gold); margin-bottom: 15px;">RICHEST PIRATES <i class="fas fa-trophy"></i></h2>
+                <table id="high-score-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px; text-align: center; color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Rank</th>
+                            <th style="padding: 10px; text-align: center; color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Pirate</th>
+                            <th style="padding: 10px; text-align: center; color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Biggest Haul</th>
+                            <th style="padding: 10px; text-align: center; color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="high-score-body">
+                        <!-- High scores will be populated here -->
+                    </tbody>
+                </table>
+                <p id="no-scores-message" style="text-align: center; color: var(--accent-color); font-style: italic; display: none;">No treasures found yet. Be the first to plunder the riches!</p>
+            </div>
+            
+            <div style="background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 20px;">
+                <h2 style="text-align: center; color: var(--rum-brown); margin-bottom: 15px;">PIRATE STATS</h2>
+                <div style="display: flex; justify-content: space-around; text-align: center;">
+                    <div>
+                        <p style="color: white;">Total Pirates:</p>
+                        <p id="total-players" style="color: var(--accent-color); font-size: 1.2rem;">0</p>
+                    </div>
+                    <div>
+                        <p style="color: white;">Biggest Haul Ever:</p>
+                        <p id="biggest-win-ever" style="color: var(--accent-color); font-size: 1.2rem;">$0</p>
+                    </div>
+                    <div>
+                        <p style="color: white;">Most Recent Plunderer:</p>
+                        <p id="most-recent-winner" style="color: var(--accent-color); font-size: 1.2rem;">None</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+                <button id="close-leaderboard-button" class="modal-button" style="font-size: 1.2rem; padding: 15px 30px;">Back to Ship</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

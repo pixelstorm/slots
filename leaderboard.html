@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirate's Treasure - Treasure Board</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Howler.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+</head>
+<body>
+    <div class="container leaderboard-page">
+        <h1>Pirate's <span class="neon-text">Treasure Board</span></h1>
+        
+        <div class="navigation-buttons">
+            <a href="index.html" class="nav-button"><i class="fas fa-skull-crossbones"></i> Back to Ship</a>
+        </div>
+        
+        <!-- High Score Board Section -->
+        <div id="leaderboard-section">
+            <h2>Richest Pirates <i class="fas fa-trophy"></i></h2>
+            <div id="leaderboard-container">
+                <table id="leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Pirate</th>
+                            <th>Biggest Haul</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- High score entries will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="leaderboard-stats">
+            <h3>Pirate Stats</h3>
+            <div id="total-stats">
+                <p>Total Pirates: <span id="total-players">0</span></p>
+                <p>Biggest Haul Ever: $<span id="biggest-win-ever">0</span></p>
+                <p>Most Recent Plunderer: <span id="most-recent-winner">None</span></p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Pirate's Treasure &copy; 2025 | <a href="index.html">Set Sail Now</a></p>
+        </footer>
+    </div>
+    
+    <script src="api.js"></script>
+    <script src="leaderboard.js"></script>
+</body>
+</html>
