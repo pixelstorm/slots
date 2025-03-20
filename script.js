@@ -176,10 +176,10 @@ function loadPlayerData() {
     }
 }
 
-// Save player data to localStorage
+// Save player data to localStorage and server
 // This function saves the player's highest score to the high score board
 // The highest score is updated when a player achieves a new biggest win
-function savePlayerData() {
+async function savePlayerData() {
     try {
         // Update current player data
         if (state.currentPlayer) {
@@ -211,6 +211,32 @@ function savePlayerData() {
             // Verify data was saved correctly
             const savedData = localStorage.getItem('pirateSlots_players');
             console.log('Saved player data:', savedData);
+            
+            // Save to server if player has a win
+            if (state.biggestWin > 0) {
+                try {
+                    // Save high score to server
+                    const response = await fetch('/api/high-scores', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: state.currentPlayer.name,
+                            score: state.biggestWin,
+                            timestamp: state.currentPlayer.lastPlayed
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('High score saved to server successfully');
+                    } else {
+                        console.error('Failed to save high score to server:', response.status);
+                    }
+                } catch (serverError) {
+                    console.error('Error saving high score to server:', serverError);
+                }
+            }
         }
     } catch (error) {
         console.error('Error saving player data:', error);
@@ -218,7 +244,7 @@ function savePlayerData() {
 }
 
 // Create a new player
-function createNewPlayer(name) {
+async function createNewPlayer(name) {
     // Check if player already exists
     const existingPlayer = state.players.find(player => player.name === name);
     
@@ -238,7 +264,7 @@ function createNewPlayer(name) {
     
     // Update UI
     updatePlayerDisplay();
-    savePlayerData();
+    await savePlayerData();
 }
 
 // Update player display
@@ -260,7 +286,7 @@ function hidePlayerModal() {
 }
 
 // Check if player is broke and offer reset
-function checkPlayerBroke() {
+async function checkPlayerBroke() {
     if (state.currentPlayer && state.balance < config.minBet) {
         // Player is broke - can't place minimum bet
         const resetBalance = confirm(`Ye be out of gold, matey! Would ye like to reset yer balance to $${config.initialBalance}?`);
@@ -270,7 +296,7 @@ function checkPlayerBroke() {
             state.balance = config.initialBalance;
             state.currentPlayer.balance = config.initialBalance;
             updateBalance();
-            savePlayerData();
+            await savePlayerData();
             showResult("Yer gold has been reset. Good luck, sailor!");
         }
     }
@@ -424,8 +450,8 @@ function stopReel(reelIndex, symbolIndex) {
     
     // Check if all reels have stopped
     if (state.reels.every(r => !r.spinning)) {
-        setTimeout(() => {
-            checkWin();
+        setTimeout(async () => {
+            await checkWin();
             state.spinning = false;
             state.canSpin = true;
         }, 500);
@@ -433,7 +459,7 @@ function stopReel(reelIndex, symbolIndex) {
 }
 
 // Check for winning combinations
-function checkWin() {
+async function checkWin() {
     // Get the symbols that landed on each reel
     const landedSymbols = state.reelResults;
     
@@ -587,12 +613,12 @@ closeModalButton.addEventListener('click', () => {
     sounds.buttonClick.play();
 });
 
-playerForm.addEventListener('submit', (e) => {
+playerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const playerName = playerNameInput.value.trim();
     
     if (playerName) {
-        createNewPlayer(playerName);
+        await createNewPlayer(playerName);
         hidePlayerModal();
         sounds.buttonClick.play();
         
@@ -626,7 +652,7 @@ const biggestWinEverElement = document.getElementById('biggest-win-ever');
 const mostRecentWinnerElement = document.getElementById('most-recent-winner');
 
 // Add event listener to the "View High Scores" button
-document.getElementById('view-high-scores').addEventListener('click', (e) => {
+document.getElementById('view-high-scores').addEventListener('click', async (e) => {
     // Ensure player data is saved before showing leaderboard
     if (state.currentPlayer) {
         console.log('Saving player data before showing leaderboard');
@@ -636,18 +662,8 @@ document.getElementById('view-high-scores').addEventListener('click', (e) => {
         state.currentPlayer.biggestWin = state.biggestWin;
         state.currentPlayer.lastPlayed = new Date().toISOString();
         
-        // Find player in array and update
-        const playerIndex = state.players.findIndex(p => p.name === state.currentPlayer.name);
-        if (playerIndex !== -1) {
-            state.players[playerIndex] = state.currentPlayer;
-        } else {
-            // Add player if not found
-            state.players.push(state.currentPlayer);
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('pirateSlots_players', JSON.stringify(state.players));
-        localStorage.setItem('pirateSlots_currentPlayer', state.currentPlayer.name);
+        // Save player data to localStorage and server
+        await savePlayerData();
         
         // Force a localStorage sync by reading the data back
         const savedData = localStorage.getItem('pirateSlots_players');
@@ -655,7 +671,7 @@ document.getElementById('view-high-scores').addEventListener('click', (e) => {
     }
     
     // Update the leaderboard with the latest data
-    updateLeaderboard();
+    await updateLeaderboard();
     
     // Show the leaderboard modal
     leaderboardModal.style.display = 'block';
