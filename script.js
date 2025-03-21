@@ -692,6 +692,35 @@ document.getElementById('top-close-leaderboard-button').addEventListener('click'
     leaderboardModal.style.display = 'none';
 });
 
+// Refresh the leaderboard when clicking the refresh button
+document.getElementById('refresh-leaderboard').addEventListener('click', async () => {
+    // Show loading indicator
+    const refreshButton = document.getElementById('refresh-leaderboard');
+    const originalText = refreshButton.innerHTML;
+    refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    refreshButton.disabled = true;
+    
+    try {
+        // Update the leaderboard with the latest data
+        await updateLeaderboard();
+        
+        // Show success message
+        showResult("Leaderboard refreshed with latest scores!");
+        setTimeout(() => {
+            showResult("");
+        }, 3000);
+    } catch (error) {
+        console.error('Error refreshing leaderboard:', error);
+        showResult("Failed to refresh leaderboard. Try again later.");
+    } finally {
+        // Restore button text
+        setTimeout(() => {
+            refreshButton.innerHTML = originalText;
+            refreshButton.disabled = false;
+        }, 1000);
+    }
+});
+
 // Close the leaderboard modal when clicking outside of it
 window.addEventListener('click', (e) => {
     if (e.target === leaderboardModal) {

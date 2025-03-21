@@ -340,5 +340,72 @@ async function updateStats() {
     }
 }
 
+// Refresh the leaderboard when clicking the refresh button
+document.getElementById('refresh-leaderboard').addEventListener('click', async () => {
+    // Show loading indicator
+    const refreshButton = document.getElementById('refresh-leaderboard');
+    const originalText = refreshButton.innerHTML;
+    refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    refreshButton.disabled = true;
+    
+    try {
+        // Update high score board
+        await updateHighScoreBoard();
+        
+        // Update stats
+        await updateStats();
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.textContent = "Leaderboard refreshed with latest scores!";
+        successMessage.style.color = 'var(--accent-color)';
+        successMessage.style.textAlign = 'center';
+        successMessage.style.padding = '10px';
+        successMessage.style.marginTop = '10px';
+        successMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+        successMessage.style.borderRadius = '5px';
+        
+        // Add the message to the page
+        const container = document.querySelector('.container');
+        container.insertBefore(successMessage, container.querySelector('footer'));
+        
+        // Remove the message after a few seconds
+        setTimeout(() => {
+            if (successMessage.parentNode) {
+                successMessage.parentNode.removeChild(successMessage);
+            }
+        }, 3000);
+    } catch (error) {
+        console.error('Error refreshing leaderboard:', error);
+        
+        // Show error message
+        const errorMessage = document.createElement('div');
+        errorMessage.textContent = "Failed to refresh leaderboard. Try again later.";
+        errorMessage.style.color = 'red';
+        errorMessage.style.textAlign = 'center';
+        errorMessage.style.padding = '10px';
+        errorMessage.style.marginTop = '10px';
+        errorMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+        errorMessage.style.borderRadius = '5px';
+        
+        // Add the message to the page
+        const container = document.querySelector('.container');
+        container.insertBefore(errorMessage, container.querySelector('footer'));
+        
+        // Remove the message after a few seconds
+        setTimeout(() => {
+            if (errorMessage.parentNode) {
+                errorMessage.parentNode.removeChild(errorMessage);
+            }
+        }, 3000);
+    } finally {
+        // Restore button text
+        setTimeout(() => {
+            refreshButton.innerHTML = originalText;
+            refreshButton.disabled = false;
+        }, 1000);
+    }
+});
+
 // Start the high score board when the page loads
 window.addEventListener('load', init);
