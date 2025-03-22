@@ -50,7 +50,9 @@
             <div class="balance-container">
                 <span><i class="fas fa-coins"></i> Gold: $</span><span id="balance">1000</span>
             </div>
-            <button id="spin-button">SPIN <i class="fas fa-skull-crossbones"></i></button>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="spin-button">SPIN <i class="fas fa-skull-crossbones"></i></button>
+            </div>
             <div class="bet-container">
                 <button id="decrease-bet">-</button>
                 <span>Bet: $<span id="bet-amount">10</span></span>
@@ -72,6 +74,16 @@
         </div>
     </div>
     
+    <!-- Result Modal -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-result-modal">&times;</span>
+            <h2 id="result-title">Spin Result</h2>
+            <div id="result-message" class="result-message"></div>
+            <button id="close-result-button" class="modal-button">Continue</button>
+        </div>
+    </div>
+    
     <!-- Leaderboard Modal -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content" style="max-width: 800px; margin: 5% auto; max-height: 80vh; overflow-y: auto;">
@@ -82,7 +94,7 @@
                 <button id="refresh-leaderboard" class="modal-button" style="font-size: 1rem; padding: 8px 15px;"><i class="fas fa-sync-alt"></i> Refresh</button>
             </div>
             
-            <div style="background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+            <div style="background-color: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 20px; margin-bottom: 20px; max-height: 500px; overflow-y: auto;">
                 <h2 style="text-align: center; color: var(--gold); margin-bottom: 15px;">RICHEST PIRATES <i class="fas fa-trophy"></i></h2>
                 <table id="high-score-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
@@ -93,7 +105,7 @@
                             <th style="padding: 10px; text-align: center; color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Date</th>
                         </tr>
                     </thead>
-                    <tbody id="high-score-body">
+                    <tbody id="high-score-body" style="max-height: 400px; overflow-y: auto; display: block;">
                         <!-- High scores will be populated here -->
                     </tbody>
                 </table>

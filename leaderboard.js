@@ -7,7 +7,7 @@
 // Game configuration (must match the main game)
 const config = {
     initialBalance: 1000,
-    maxLeaderboardEntries: 10
+    maxLeaderboardEntries: 15
 };
 
 // DOM Elements
@@ -159,15 +159,23 @@ async function updateHighScoreBoard() {
         });
         console.log('Sorted pirates:', sortedPlayers);
         
-        // Limit to max entries
-        const topPlayers = sortedPlayers.slice(0, config.maxLeaderboardEntries);
+        // Show all players (no limit)
+        const topPlayers = sortedPlayers;
+        console.log("Total players to display:", topPlayers.length);
+        console.log("Players:", topPlayers.map(p => p.name).join(", "));
         console.log('Top pirates to display:', topPlayers);
         
         // Get current player name from localStorage
         const currentPlayerName = localStorage.getItem('pirateSlots_currentPlayer');
         console.log('Current pirate name:', currentPlayerName);
         
-        // Add players to high score board
+        // Clear the leaderboard body first to ensure we don't have duplicate entries
+        leaderboardBody.innerHTML = '';
+        
+        // Log the number of players we're about to display
+        console.log(`Displaying ${topPlayers.length} players on the leaderboard`);
+        
+        // Add players to high score board (show all players)
         topPlayers.forEach((player, index) => {
             const row = document.createElement('tr');
             
@@ -189,10 +197,10 @@ async function updateHighScoreBoard() {
             const score = player.score !== undefined ? player.score : player.biggestWin;
             
             row.innerHTML = `
-                <td class="${rankClass}">${index + 1}</td>
-                <td>${player.name}${isCurrentPlayer ? ' <i class="fas fa-user"></i>' : ''}</td>
-                <td>$${score}</td>
-                <td>${formattedDate}</td>
+                <td class="${rankClass}" style="width: 10%;">${index + 1}</td>
+                <td style="width: 30%;">${player.name}${isCurrentPlayer ? ' <i class="fas fa-user"></i>' : ''}</td>
+                <td style="width: 30%;">$${score}</td>
+                <td style="width: 30%;">${formattedDate}</td>
             `;
             
             leaderboardBody.appendChild(row);

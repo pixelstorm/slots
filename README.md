@@ -1,85 +1,86 @@
-# Pirate's Treasure Slot Machine
+# Pirate's Treasure Slot Machine Game
 
-A pirate-themed slot machine game built with Node.js that supports player names and high score tracking.
+A Node.js-based slot machine game with a pirate theme, player management, and high score tracking.
 
 ## Features
 
-- Pirate-themed slot machine game
-- Player name registration
-- High score tracking
-- Persistent storage of player data
-- Responsive design for various screen sizes
-- Animated slot machine with sound effects
+- **Pirate-themed slot machine** with animated reels and sound effects
+- **Player management** system that saves player data
+- **Leaderboard** to track and display high scores
+- **Persistent storage** of player data and high scores
+- **Responsive design** that works on different screen sizes
 
 ## Technologies Used
 
-- Node.js
-- Express.js
-- HTML5
-- CSS3
-- JavaScript
-- LocalStorage (for client-side data)
-- JSON (for server-side data storage)
-
-## Installation
-
-1. Clone the repository or download the source code
-2. Navigate to the project directory
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-4. Start the server:
-
-```bash
-npm start
-```
-
-5. Open your browser and navigate to `http://localhost:3000`
+- **Node.js** for the server-side logic
+- **Express** for the web server and API endpoints
+- **HTML/CSS/JavaScript** for the frontend
+- **LocalStorage** for client-side data persistence
+- **Server-side JSON storage** for high scores
 
 ## How to Play
 
-1. Enter your pirate name when prompted
-2. Set your bet amount using the + and - buttons
+1. Enter your pirate name to start the game
+2. Adjust your bet amount using the + and - buttons
 3. Click the SPIN button to spin the reels
 4. Match symbols to win gold!
-5. Three matching symbols give the biggest payout
-6. Two matching symbols give a smaller payout
-7. View the Treasure Board to see the highest scores
+5. View the leaderboard to see how you rank against other pirates
 
-## Sample Data
+## Winning Combinations
 
-To populate the leaderboard with sample pirate data for testing purposes, run:
+- **Three matching symbols**: Jackpot! Win the full value of the symbols
+- **Two matching symbols**: Partial win based on the symbol value
 
-```bash
-node seed-data.js
-```
+## Installation and Setup
 
-This will create sample pirates with random high scores, allowing you to see how the Treasure Board looks with multiple players.
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the server:
+   ```
+   npm start
+   ```
+4. Open your browser and navigate to `http://localhost:3000`
 
-## Game Symbols
+## Project Structure
 
-- Skull: 10x bet multiplier
-- Coin: 20x bet multiplier
-- Sword: 30x bet multiplier
-- Map: 40x bet multiplier
-- Ship: 50x bet multiplier
-- Treasure Chest: 100x bet multiplier (Jackpot!)
+- `index.html` - Main game page
+- `leaderboard.html` - Standalone leaderboard page
+- `script.js` - Main game logic
+- `leaderboard.js` - Leaderboard functionality
+- `style.css` - Game styling
+- `server.js` - Express server and API endpoints
+- `api.js` - Client-side API functions
+- `high-scores.json` - Persistent storage for high scores
 
-## High Score System
+## Game Mechanics
 
-The game tracks each player's highest win amount. When a player achieves a new personal best, their score is updated on the Treasure Board. The leaderboard shows the top 10 players with the highest scores.
+- Players start with 1000 gold
+- Minimum bet is 50 gold
+- Maximum bet is 1000 gold
+- Each symbol has a different value:
+  - Skull: 10x
+  - Coin: 20x
+  - Sword: 30x
+  - Map: 40x
+  - Ship: 50x
+  - Chest: 100x
 
-## Development
+## Leaderboard
 
-To run the game in development mode with automatic server restarts:
+The leaderboard tracks:
+- Player names
+- Current gold amount
+- Date of last play
 
-```bash
-npm run dev
-```
+Players can view the leaderboard at any time by clicking the "TREASURE BOARD" button.
 
-## License
+## Future Enhancements
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+- Add more symbols and winning combinations
+- Implement bonus rounds and special features
+- Add sound volume controls
+- Create a multiplayer mode
+- Add animations for big wins

@@ -22,7 +22,7 @@
         <!-- High Score Board Section -->
         <div id="leaderboard-section">
             <h2>Richest Pirates <i class="fas fa-trophy"></i></h2>
-            <div id="leaderboard-container">
+            <div id="leaderboard-container" style="max-height: 500px; overflow-y: auto;">
                 <table id="leaderboard">
                     <thead>
                         <tr>
@@ -32,7 +32,7 @@
                             <th>Date</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-body">
+                    <tbody id="leaderboard-body" style="max-height: 400px; overflow-y: auto; display: block;">
                         <!-- High score entries will be added here dynamically -->
                     </tbody>
                 </table>

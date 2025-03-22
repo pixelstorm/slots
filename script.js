@@ -20,7 +20,7 @@ const config = {
         { name: 'ship', icon: 'fa-ship', value: 50, color: 'var(--wood-brown)' },
         { name: 'chest', icon: 'fa-treasure-chest', value: 100, color: 'var(--primary-color)' }
     ],
-    maxLeaderboardEntries: 10 // Maximum number of entries to show in the leaderboard
+    maxLeaderboardEntries: 15 // Maximum number of entries to show in the leaderboard
 };
 
 // Player data structure
@@ -100,6 +100,13 @@ const closeModalButton = document.querySelector('.close-modal');
 const playerForm = document.getElementById('player-form');
 const playerNameInput = document.getElementById('player-name-input');
 
+// Result Modal Elements
+const resultModal = document.getElementById('result-modal');
+const resultTitle = document.getElementById('result-title');
+const resultMessage = document.getElementById('result-message');
+const closeResultButton = document.getElementById('close-result-button');
+const closeResultModalButton = document.querySelector('.close-result-modal');
+
 // Initialize the game
 function init() {
     // Initialize localStorage with default data if none exists
@@ -133,8 +140,6 @@ function initializeLocalStorage() {
     
     // If no data exists, initialize with an empty array
     if (!playersData) {
-        console.log('Initializing localStorage with empty players array');
-        
         // Initialize with empty array - players will be added as they play
         const emptyPlayers = [];
         
@@ -170,9 +175,167 @@ function loadPlayerData() {
             state.currentPlayer = null;
         }
     } catch (error) {
-        console.error('Error loading player data:', error);
+        // Silently handle errors in production
         // Error loading player data, will show modal
         state.currentPlayer = null;
+    }
+}
+
+// Handle the skull curse - distribute half of player's gold to other players
+async function handleSkullCurse() {
+    if (!state.currentPlayer) {
+        showResult("Ye need to be logged in to share yer gold!");
+        return;
+    }
+    
+    try {
+        // Calculate half of player's gold
+        const goldToDistribute = Math.floor(state.balance / 2);
+        
+        if (goldToDistribute <= 0) {
+            showResult("Ye be cursed with 3 skulls, but ye have no gold to share!");
+            return;
+        }
+        
+        // Get all players from the server
+        const allPlayers = await API.getHighScores();
+        
+        // Filter out current player and players with no gold
+        // Note: Server uses 'score' property for player's gold
+        const otherPlayers = allPlayers.filter(player =>
+            player.name !== state.currentPlayer.name && player.score > 0
+        );
+        
+        if (otherPlayers.length === 0) {
+            showResult("Ye be cursed with 3 skulls, but there be no other pirates to share with!");
+            return;
+        }
+        
+        // Calculate gold per player
+        const goldPerPlayer = Math.floor(goldToDistribute / otherPlayers.length);
+        
+        if (goldPerPlayer <= 0) {
+            showResult("Ye be cursed with 3 skulls, but there's not enough gold to share!");
+            return;
+        }
+        
+        // Deduct gold from current player
+        state.balance -= goldToDistribute;
+        updateBalance();
+        
+        // Play a special skull curse sound
+        sounds.cannon.play();
+        
+        // Show skull curse animation
+        resultElement.classList.add('curse-animation');
+        document.getElementById('slot-machine').classList.add('skull-glow');
+        winLine.classList.add('show');
+        
+        // Prepare batch updates for all other players
+        const updates = otherPlayers.map(player => ({
+            name: player.name,
+            score: player.score + goldPerPlayer,
+            timestamp: player.timestamp
+        }));
+        
+        // Update all players' gold in a single API call
+        await API.batchUpdateScores(updates);
+        
+        // Save current player's reduced gold
+        await savePlayerData();
+        
+        // Show result message
+        showResult(`SKULL CURSE! Half yer gold ($${goldToDistribute}) has been distributed to ${otherPlayers.length} other pirates! Each received $${goldPerPlayer}.`, true);
+        
+        // Remove animation classes after they complete
+        setTimeout(() => {
+            resultElement.classList.remove('curse-animation');
+            document.getElementById('slot-machine').classList.remove('skull-glow');
+            winLine.classList.remove('show');
+        }, 3000);
+        
+    } catch (error) {
+        // Silently handle errors in production
+        showResult("There was an error sharing yer gold. The curse has been lifted!");
+    }
+}
+
+// Handle the two-skull curse - distribute 33% of player's gold to other players
+async function handleTwoSkullCurse() {
+    if (!state.currentPlayer) {
+        showResult("Ye need to be logged in to share yer gold!");
+        return;
+    }
+    
+    try {
+        // Calculate 33% of player's gold
+        const goldToDistribute = Math.floor(state.balance * 0.33);
+        
+        if (goldToDistribute <= 0) {
+            showResult("Ye be cursed with 2 skulls, but ye have no gold to share!");
+            return;
+        }
+        
+        // Get all players from the server
+        const allPlayers = await API.getHighScores();
+        
+        // Filter out current player and players with no gold
+        // Note: Server uses 'score' property for player's gold
+        const otherPlayers = allPlayers.filter(player =>
+            player.name !== state.currentPlayer.name && player.score > 0
+        );
+        
+        if (otherPlayers.length === 0) {
+            showResult("Ye be cursed with 2 skulls, but there be no other pirates to share with!");
+            return;
+        }
+        
+        // Calculate gold per player
+        const goldPerPlayer = Math.floor(goldToDistribute / otherPlayers.length);
+        
+        if (goldPerPlayer <= 0) {
+            showResult("Ye be cursed with 2 skulls, but there's not enough gold to share!");
+            return;
+        }
+        
+        // Deduct gold from current player
+        state.balance -= goldToDistribute;
+        updateBalance();
+        
+        // Play a special skull curse sound
+        sounds.cannon.play();
+        
+        // Show skull curse animation (with a different style for 2 skulls)
+        resultElement.classList.add('curse-animation-mild');
+        document.getElementById('slot-machine').classList.add('skull-glow-mild');
+        winLine.classList.add('show');
+        
+        // Prepare batch updates for all other players
+        const updates = otherPlayers.map(player => ({
+            name: player.name,
+            score: player.score + goldPerPlayer,
+            timestamp: player.timestamp
+        }));
+        
+        // Update all players' gold in a single API call
+        await API.batchUpdateScores(updates);
+        
+        // Save current player's reduced gold
+        await savePlayerData();
+        
+        // Show result message
+        showResult(`SKULL CURSE! 33% of yer gold ($${goldToDistribute}) has been distributed to ${otherPlayers.length} other pirates! Each received $${goldPerPlayer}.`, true);
+        
+        // Remove animation classes after they complete
+        setTimeout(() => {
+            resultElement.classList.remove('curse-animation-mild');
+            document.getElementById('slot-machine').classList.remove('skull-glow-mild');
+            winLine.classList.remove('show');
+        }, 3000);
+        
+    } catch (error) {
+        // Silently handle errors in production
+        showResult("There was an error sharing yer gold. The curse has been lifted!");
     }
 }
 
@@ -183,10 +346,6 @@ async function savePlayerData() {
     try {
         // Update current player data
         if (state.currentPlayer) {
-            console.log('Saving player data for:', state.currentPlayer.name);
-            console.log('Current balance:', state.balance);
-            console.log('Current biggest win:', state.biggestWin);
-            
             state.currentPlayer.balance = state.balance;
             state.currentPlayer.biggestWin = state.biggestWin;
             state.currentPlayer.lastPlayed = new Date().toISOString();
@@ -194,52 +353,41 @@ async function savePlayerData() {
             // Find player in array and update
             const playerIndex = state.players.findIndex(p => p.name === state.currentPlayer.name);
             if (playerIndex !== -1) {
-                console.log('Updating existing player at index:', playerIndex);
                 state.players[playerIndex] = state.currentPlayer;
             } else {
                 // Add player if not found
-                console.log('Adding new player to players array');
                 state.players.push(state.currentPlayer);
             }
-            
-            console.log('Players array before saving:', state.players);
             
             // Save to localStorage
             localStorage.setItem('pirateSlots_players', JSON.stringify(state.players));
             localStorage.setItem('pirateSlots_currentPlayer', state.currentPlayer.name);
             
-            // Verify data was saved correctly
-            const savedData = localStorage.getItem('pirateSlots_players');
-            console.log('Saved player data:', savedData);
-            
-            // Save to server if player has a win
-            if (state.biggestWin > 0) {
-                try {
-                    // Save high score to server
-                    const response = await fetch('/api/high-scores', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: state.currentPlayer.name,
-                            score: state.balance,
-                            timestamp: state.currentPlayer.lastPlayed
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        console.log('High score saved to server successfully');
-                    } else {
-                        console.error('Failed to save high score to server:', response.status);
-                    }
-                } catch (serverError) {
-                    console.error('Error saving high score to server:', serverError);
+            // Always save to server to update current gold
+            try {
+                // Save current gold to server
+                const response = await fetch('/api/high-scores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: state.currentPlayer.name,
+                        score: state.balance,
+                        timestamp: state.currentPlayer.lastPlayed
+                    })
+                });
+                
+                // Silently handle server errors in production
+                if (!response.ok) {
+                    // Server error handling without console logs
                 }
+            } catch (serverError) {
+                // Silently handle server errors in production
             }
         }
     } catch (error) {
-        console.error('Error saving player data:', error);
+        // Silently handle errors in production
     }
 }
 
@@ -467,40 +615,44 @@ async function checkWin() {
     const allSame = landedSymbols.every(symbol => symbol.name === landedSymbols[0].name);
     
     if (allSame) {
-        // Jackpot win!
-        const symbolValue = landedSymbols[0].value;
-        const winAmount = state.currentBet * symbolValue;
-        
-        state.balance += winAmount;
-        updateBalance();
-        
-        // Update biggest win if this is larger
-        if (winAmount > state.biggestWin) {
-            console.log('New biggest win:', winAmount, 'Previous biggest win:', state.biggestWin);
-            state.biggestWin = winAmount;
-            if (state.currentPlayer) {
-                console.log('Updating player biggest win for:', state.currentPlayer.name);
-                state.currentPlayer.biggestWin = winAmount;
+        // Check if all symbols are skulls
+        if (landedSymbols[0].name === 'skull') {
+            // Skull curse! Half of player's gold is distributed to other players
+            await handleSkullCurse();
+        } else {
+            // Regular jackpot win!
+            const symbolValue = landedSymbols[0].value;
+            const winAmount = state.currentBet * symbolValue;
+            
+            state.balance += winAmount;
+            updateBalance();
+            
+            // Update biggest win if this is larger
+            if (winAmount > state.biggestWin) {
+                state.biggestWin = winAmount;
+                if (state.currentPlayer) {
+                    state.currentPlayer.biggestWin = winAmount;
+                }
             }
+            
+            // Play jackpot sound and cannon sound
+            sounds.jackpot.play();
+            sounds.cannon.play();
+            
+            // Show win message with animation
+            resultElement.classList.add('win-animation');
+            document.getElementById('slot-machine').classList.add('sunset-glow');
+            winLine.classList.add('show');
+            
+            showResult(`PIRATE'S TREASURE! Ye won $${winAmount}!`, true);
+            
+            // Remove animation classes after they complete
+            setTimeout(() => {
+                resultElement.classList.remove('win-animation');
+                document.getElementById('slot-machine').classList.remove('sunset-glow');
+                winLine.classList.remove('show');
+            }, 3000);
         }
-        
-        // Play jackpot sound and cannon sound
-        sounds.jackpot.play();
-        sounds.cannon.play();
-        
-        // Show win message with animation
-        resultElement.classList.add('win-animation');
-        document.getElementById('slot-machine').classList.add('sunset-glow');
-        winLine.classList.add('show');
-        
-        showResult(`PIRATE'S TREASURE! Ye won $${winAmount}!`);
-        
-        // Remove animation classes after they complete
-        setTimeout(() => {
-            resultElement.classList.remove('win-animation');
-            document.getElementById('slot-machine').classList.remove('sunset-glow');
-            winLine.classList.remove('show');
-        }, 3000);
     } else {
         // Check for partial matches (2 of a kind)
         const symbolCounts = {};
@@ -510,7 +662,11 @@ async function checkWin() {
         
         const maxCount = Math.max(...Object.values(symbolCounts));
         
-        if (maxCount >= 2) {
+        // Check if there are exactly 2 skulls
+        if (symbolCounts['skull'] === 2) {
+            // Two-skull curse! 33% of player's gold is distributed to other players
+            await handleTwoSkullCurse();
+        } else if (maxCount >= 2) {
             // Partial win with 2 or more matching symbols
             const matchingSymbol = Object.keys(symbolCounts).find(key => symbolCounts[key] === maxCount);
             const symbolObj = config.symbols.find(s => s.name === matchingSymbol);
@@ -523,10 +679,8 @@ async function checkWin() {
             
             // Update biggest win if this is larger
             if (winAmount > state.biggestWin) {
-                console.log('New biggest win (partial):', winAmount, 'Previous biggest win:', state.biggestWin);
                 state.biggestWin = winAmount;
                 if (state.currentPlayer) {
-                    console.log('Updating player biggest win for:', state.currentPlayer.name);
                     state.currentPlayer.biggestWin = winAmount;
                 }
             }
@@ -541,7 +695,7 @@ async function checkWin() {
             // Format the symbol name for display
             const formattedSymbol = matchingSymbol.replace('-', ' ');
             
-            showResult(`Ye won $${winAmount} with ${maxCount} ${formattedSymbol}s!`);
+            showResult(`Ye won $${winAmount} with ${maxCount} ${formattedSymbol}s!`, true);
             
             // Remove animation class after it completes
             setTimeout(() => {
@@ -564,8 +718,49 @@ function updateBalance() {
 }
 
 // Show result message
-function showResult(message) {
+function showResult(message, isImportant = false) {
+    // Always update the old result element for backward compatibility
     resultElement.textContent = message;
+    
+    // If it's an important message (like a win or curse), show it in the modal
+    if (isImportant && message) {
+        // Set the message in the modal
+        resultMessage.textContent = message;
+        
+        // Set appropriate title and classes based on message content
+        if (message.includes("SKULL CURSE")) {
+            resultTitle.textContent = "Skull Curse!";
+            resultTitle.style.color = "var(--secondary-color)";
+            resultTitle.style.textShadow = "0 0 10px var(--secondary-color)";
+            
+            if (message.includes("33%")) {
+                resultMessage.className = "result-message curse-animation-mild";
+            } else {
+                resultMessage.className = "result-message curse-animation";
+            }
+        } else if (message.includes("PIRATE'S TREASURE") || message.includes("won")) {
+            resultTitle.textContent = "Treasure Found!";
+            resultTitle.style.color = "var(--gold)";
+            resultTitle.style.textShadow = "0 0 10px var(--gold)";
+            resultMessage.className = "result-message win-animation";
+        } else {
+            resultTitle.textContent = "Spin Result";
+            resultTitle.style.color = "var(--accent-color)";
+            resultTitle.style.textShadow = "0 0 10px var(--accent-color)";
+            resultMessage.className = "result-message";
+        }
+        
+        // Show the modal - ensure it's visible
+        resultModal.style.display = "block";
+        
+        // Force a reflow to ensure the modal is displayed
+        resultModal.offsetHeight;
+    }
+}
+
+// Hide result modal
+function hideResultModal() {
+    resultModal.style.display = "none";
 }
 
 // Increase bet amount
@@ -586,6 +781,8 @@ function decreaseBet() {
     sounds.buttonClick.play();
 }
 
+// Production code - test functions removed
+
 // Event listeners
 spinButton.addEventListener('click', () => {
     if (!state.spinning && state.canSpin) {
@@ -598,6 +795,8 @@ spinButton.addEventListener('click', () => {
         }
     }
 });
+
+// Production code - test button event listeners removed
 
 decreaseBetButton.addEventListener('click', decreaseBet);
 increaseBetButton.addEventListener('click', increaseBet);
@@ -655,8 +854,6 @@ const mostRecentWinnerElement = document.getElementById('most-recent-winner');
 document.getElementById('view-high-scores').addEventListener('click', async (e) => {
     // Ensure player data is saved before showing leaderboard
     if (state.currentPlayer) {
-        console.log('Saving player data before showing leaderboard');
-        
         // Update current player data with latest values
         state.currentPlayer.balance = state.balance;
         state.currentPlayer.biggestWin = state.biggestWin;
@@ -664,10 +861,6 @@ document.getElementById('view-high-scores').addEventListener('click', async (e) 
         
         // Save player data to localStorage and server
         await savePlayerData();
-        
-        // Force a localStorage sync by reading the data back
-        const savedData = localStorage.getItem('pirateSlots_players');
-        console.log('Verified saved player data:', savedData);
     }
     
     // Update the leaderboard with the latest data
@@ -710,7 +903,7 @@ document.getElementById('refresh-leaderboard').addEventListener('click', async (
             showResult("");
         }, 3000);
     } catch (error) {
-        console.error('Error refreshing leaderboard:', error);
+        // Silently handle errors in production
         showResult("Failed to refresh leaderboard. Try again later.");
     } finally {
         // Restore button text
@@ -737,17 +930,13 @@ async function updateLeaderboard() {
         
         if (response.ok) {
             serverHighScores = await response.json();
-            console.log('Server high scores:', serverHighScores);
         } else {
-            console.error('Failed to fetch high scores from server:', response.status);
+            // Silently handle server errors in production
         }
         
         // Get the latest player data from localStorage as a fallback
         const playersData = JSON.parse(localStorage.getItem('pirateSlots_players') || '[]');
         const currentPlayerName = localStorage.getItem('pirateSlots_currentPlayer');
-        
-        console.log('Updating leaderboard with players:', playersData);
-        console.log('Current player name:', currentPlayerName);
         
         // Clear the existing high scores
         highScoreBody.innerHTML = '';
@@ -787,10 +976,16 @@ async function updateLeaderboard() {
             return scoreB - scoreA;
         });
         
-        // Get the top players to display (up to 10)
-        const topPlayers = sortedPlayers.slice(0, 10);
+        // Get all players to display (no limit)
+        const topPlayers = sortedPlayers;
         
-        // Add each player to the high score table
+        // Clear the high score body first
+        highScoreBody.innerHTML = '';
+        
+        // Clear the high score body first to ensure we don't have duplicate entries
+        highScoreBody.innerHTML = '';
+        
+        // Add each player to the high score table (show all players)
         topPlayers.forEach((player, index) => {
             const row = document.createElement('tr');
             
@@ -808,10 +1003,10 @@ async function updateLeaderboard() {
             const score = player.score !== undefined ? player.score : player.biggestWin;
             
             row.innerHTML = `
-                <td style="padding: 10px; text-align: center; color: var(--gold); font-weight: bold;">${index + 1}</td>
-                <td style="padding: 10px; text-align: center; color: white;">${player.name} ${player.name === currentPlayerName ? '<i class="fas fa-user"></i>' : ''}</td>
-                <td style="padding: 10px; text-align: center; color: var(--accent-color);">$${score}</td>
-                <td style="padding: 10px; text-align: center; color: white;">${formattedDate}</td>
+                <td style="padding: 10px; text-align: center; color: var(--gold); font-weight: bold; width: 10%;">${index + 1}</td>
+                <td style="padding: 10px; text-align: center; color: white; width: 30%;">${player.name} ${player.name === currentPlayerName ? '<i class="fas fa-user"></i>' : ''}</td>
+                <td style="padding: 10px; text-align: center; color: var(--accent-color); width: 30%;">$${score}</td>
+                <td style="padding: 10px; text-align: center; color: white; width: 30%;">${formattedDate}</td>
             `;
             
             highScoreBody.appendChild(row);
@@ -833,7 +1028,7 @@ async function updateLeaderboard() {
         
         mostRecentWinnerElement.textContent = sortedByDate.length > 0 ? sortedByDate[0].name : 'None';
     } catch (error) {
-        console.error('Error updating leaderboard:', error);
+        // Silently handle errors in production
         
         // Fallback to localStorage only if there's an error
         const playersData = JSON.parse(localStorage.getItem('pirateSlots_players') || '[]');
@@ -866,6 +1061,24 @@ async function updateLeaderboard() {
         }
     }
 }
+
+// Result Modal event listeners
+closeResultButton.addEventListener('click', () => {
+    hideResultModal();
+    sounds.buttonClick.play();
+});
+
+closeResultModalButton.addEventListener('click', () => {
+    hideResultModal();
+    sounds.buttonClick.play();
+});
+
+// Close the result modal when clicking outside of it
+window.addEventListener('click', (e) => {
+    if (e.target === resultModal) {
+        hideResultModal();
+    }
+});
 
 // Start the game when the page loads
 window.addEventListener('load', init);

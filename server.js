@@ -64,11 +64,9 @@ app.post('/api/high-scores', (req, res) => {
     const existingPlayerIndex = highScores.findIndex(player => player.name === name);
     
     if (existingPlayerIndex !== -1) {
-        // Update existing player if new score is higher
-        if (score > highScores[existingPlayerIndex].score) {
-            highScores[existingPlayerIndex].score = score;
-            highScores[existingPlayerIndex].timestamp = timestamp || new Date().toISOString();
-        }
+        // Always update the player's score to reflect current gold
+        highScores[existingPlayerIndex].score = score;
+        highScores[existingPlayerIndex].timestamp = timestamp || new Date().toISOString();
     } else {
         // Add new player
         highScores.push({
@@ -100,6 +98,68 @@ app.get('/api/high-scores/:name', (req, res) => {
         res.json(player);
     } else {
         res.status(404).json({ error: 'Player not found' });
+    }
+});
+
+// API endpoint to update multiple players' scores at once (for skull curse feature)
+app.post('/api/high-scores/batch-update', (req, res) => {
+    const { updates } = req.body;
+    
+    console.log('Received batch update request:', JSON.stringify(req.body));
+    
+    if (!updates || !Array.isArray(updates)) {
+        console.log('Invalid updates array:', updates);
+        return res.status(400).json({ error: 'Updates array is required' });
+    }
+    
+    const highScores = getHighScores();
+    console.log('Current high scores before update:', JSON.stringify(highScores));
+    
+    let updatedCount = 0;
+    
+    // Process each update
+    updates.forEach(update => {
+        const { name, score, timestamp } = update;
+        console.log('Processing update for player:', name, 'score:', score);
+        
+        if (!name || score === undefined) {
+            console.log('Skipping invalid update:', update);
+            return; // Skip invalid updates
+        }
+        
+        // Find and update player
+        const existingPlayerIndex = highScores.findIndex(player => player.name === name);
+        
+        if (existingPlayerIndex !== -1) {
+            console.log('Updating existing player:', name, 'from', highScores[existingPlayerIndex].score, 'to', score);
+            highScores[existingPlayerIndex].score = score;
+            highScores[existingPlayerIndex].timestamp = timestamp || new Date().toISOString();
+            updatedCount++;
+        } else {
+            console.log('Adding new player:', name, 'with score:', score);
+            // Add new player if not found
+            highScores.push({
+                name,
+                score,
+                timestamp: timestamp || new Date().toISOString()
+            });
+            updatedCount++;
+        }
+    });
+    
+    console.log('Updated high scores:', JSON.stringify(highScores));
+    
+    // Sort high scores by score (descending)
+    highScores.sort((a, b) => b.score - a.score);
+    
+    // Save high scores
+    if (saveHighScores(highScores)) {
+        res.json({
+            success: true,
+            message: `${updatedCount} player scores updated successfully`
+        });
+    } else {
+        res.status(500).json({ error: 'Failed to save high scores' });
     }
 });
 

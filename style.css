@@ -531,6 +531,36 @@ button:active {
     color: var(--light-color);
 }
 
+#leaderboard thead, #leaderboard tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#leaderboard tbody {
+    display: block;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+#high-score-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--light-color);
+}
+
+#high-score-table thead, #high-score-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#high-score-body {
+    display: block;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
 #leaderboard th, #leaderboard td {
     padding: 10px;
     text-align: center;
@@ -593,6 +623,53 @@ button:active {
     backdrop-filter: blur(5px);
     overflow-y: auto; /* Allow scrolling for tall content */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Result Modal Styles */
+.result-message {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(26, 26, 46, 0.5);
+    min-height: 60px;
+}
+
+#result-modal {
+    z-index: 200; /* Ensure it's above other elements */
+}
+
+#result-title {
+    color: var(--accent-color);
+    text-shadow: 0 0 10px var(--accent-color);
+}
+
+#close-result-button {
+    display: block;
+    margin: 20px auto;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+}
+
+.result-message.win-animation {
+    animation: win-pulse 0.5s ease-in-out 5;
+    background: linear-gradient(to right, rgba(160, 82, 45, 0.3), rgba(78, 205, 196, 0.3));
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+
+.result-message.curse-animation {
+    animation: curse-pulse 0.5s ease-in-out 5;
+    background: linear-gradient(to right, rgba(139, 0, 0, 0.3), rgba(26, 26, 46, 0.5));
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+}
+
+.result-message.curse-animation-mild {
+    animation: curse-pulse-mild 0.5s ease-in-out 4;
+    background: linear-gradient(to right, rgba(139, 0, 0, 0.2), rgba(26, 26, 46, 0.4));
+    box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);
 }
 
 .modal-content {
@@ -825,6 +902,86 @@ button:active {
 @keyframes sunset-pulse {
     from { opacity: 0.7; }
     to { opacity: 1; }
+}
+
+/* Skull curse glow effect */
+.skull-glow {
+    background: linear-gradient(to right,
+        rgba(26, 26, 46, 0.8),
+        rgba(139, 0, 0, 0.7),
+        rgba(26, 26, 46, 0.8));
+    animation: skull-pulse 1.5s infinite alternate;
+}
+
+@keyframes skull-pulse {
+    from { opacity: 0.7; box-shadow: 0 0 15px rgba(139, 0, 0, 0.5); }
+    to { opacity: 1; box-shadow: 0 0 30px rgba(139, 0, 0, 0.8); }
+}
+
+/* Two-skull curse glow effect (milder version) */
+.skull-glow-mild {
+    background: linear-gradient(to right,
+        rgba(26, 26, 46, 0.8),
+        rgba(139, 0, 0, 0.5),
+        rgba(26, 26, 46, 0.8));
+    animation: skull-pulse-mild 1.5s infinite alternate;
+}
+
+@keyframes skull-pulse-mild {
+    from { opacity: 0.6; box-shadow: 0 0 10px rgba(139, 0, 0, 0.4); }
+    to { opacity: 0.9; box-shadow: 0 0 20px rgba(139, 0, 0, 0.6); }
+}
+
+/* Animation for skull curse */
+@keyframes curse-pulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    50% {
+        transform: scale(1.1);
+        color: var(--secondary-color);
+        text-shadow:
+            0 0 5px var(--secondary-color),
+            0 0 10px var(--secondary-color),
+            0 0 20px var(--secondary-color);
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+}
+
+.curse-animation {
+    animation: curse-pulse 0.5s ease-in-out 5;
+    background: linear-gradient(to right, rgba(139, 0, 0, 0.3), rgba(26, 26, 46, 0.5));
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+}
+
+/* Animation for two-skull curse (milder version) */
+@keyframes curse-pulse-mild {
+    0% {
+        transform: scale(1);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    50% {
+        transform: scale(1.05);
+        color: var(--secondary-color);
+        text-shadow:
+            0 0 3px var(--secondary-color),
+            0 0 7px var(--secondary-color),
+            0 0 14px var(--secondary-color);
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+}
+
+.curse-animation-mild {
+    animation: curse-pulse-mild 0.5s ease-in-out 4;
+    background: linear-gradient(to right, rgba(139, 0, 0, 0.2), rgba(26, 26, 46, 0.4));
+    box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);
 }
 
 /* Leaderboard page styles */

@@ -1,62 +1,72 @@
 [
   {
-    "name": "shivers",
-    "score": 20672,
-    "timestamp": "2025-03-20T17:04:39.209Z"
-  },
-  {
     "name": "Captain Kidd",
-    "score": 4378,
+    "score": 5992,
     "timestamp": "2025-03-20T05:09:36.328Z"
   },
   {
+    "name": "shivers",
+    "score": 5195,
+    "timestamp": "2025-03-22T18:52:59.315Z"
+  },
+  {
     "name": "Grace O'Malley",
-    "score": 3385,
+    "score": 4999,
     "timestamp": "2025-02-23T05:09:36.328Z"
   },
   {
     "name": "Henry Morgan",
-    "score": 3227,
+    "score": 4841,
     "timestamp": "2025-03-04T05:09:36.329Z"
   },
   {
-    "name": "Blackbeard",
-    "score": 2199,
-    "timestamp": "2025-03-06T05:09:36.313Z"
-  },
-  {
     "name": "Captain Hook",
-    "score": 1378,
+    "score": 2992,
     "timestamp": "2025-03-01T05:09:36.328Z"
   },
   {
     "name": "Anne Bonny",
-    "score": 1333,
+    "score": 2947,
     "timestamp": "2025-02-27T05:09:36.328Z"
   },
   {
     "name": "Long John Silver",
-    "score": 1101,
+    "score": 2715,
     "timestamp": "2025-03-03T05:09:36.328Z"
   },
   {
     "name": "Calico Jack",
-    "score": 1057,
+    "score": 2671,
     "timestamp": "2025-03-03T05:09:36.328Z"
   },
   {
+    "name": "TestPlayer",
+    "score": 2614,
+    "timestamp": "2025-03-21T05:56:30.641Z"
+  },
+  {
     "name": "Bartholomew Roberts",
-    "score": 920,
+    "score": 2534,
     "timestamp": "2025-02-26T05:09:36.328Z"
   },
   {
+    "name": "Blackbeard",
+    "score": 2406,
+    "timestamp": "2025-03-21T06:35:49.788Z"
+  },
+  {
     "name": "Captain Blackbeard",
-    "score": 500,
+    "score": 2114,
     "timestamp": "2025-03-20T16:50:53.840Z"
   },
   {
     "name": "Mary Read",
-    "score": 317,
+    "score": 1931,
     "timestamp": "2025-03-04T05:09:36.328Z"
+  },
+  {
+    "name": "Captain Jack",
+    "score": 1300,
+    "timestamp": "2025-03-22T19:04:58.111Z"
   }
 ]

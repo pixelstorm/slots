@@ -72,6 +72,38 @@ const API = {
     },
 
     /**
+     * Update multiple players' scores at once (for skull curse feature)
+     * @param {Array} updates - Array of player updates, each with name, score, and optional timestamp
+     * @returns {Promise<boolean>} Success status
+     */
+    batchUpdateScores: async function(updates) {
+        try {
+            console.log('API.batchUpdateScores called with updates:', JSON.stringify(updates));
+            
+            const response = await fetch('/api/high-scores/batch-update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ updates })
+            });
+            
+            console.log('Batch update response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('Batch update result:', result);
+            return result.success;
+        } catch (error) {
+            console.error('Error batch updating scores:', error);
+            return false;
+        }
+    },
+
+    /**
      * Fallback to localStorage if server is unavailable
      */
     fallbackToLocalStorage: {
