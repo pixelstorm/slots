@@ -54,5 +54,5 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# High scores data file (uncomment if you want to exclude it from version control)
-# high-scores.json
+# High scores data file
+high-scores.json

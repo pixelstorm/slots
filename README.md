@@ -31,6 +31,11 @@ A Node.js-based slot machine game with a pirate theme, player management, and hi
 - **Three matching symbols**: Jackpot! Win the full value of the symbols
 - **Two matching symbols**: Partial win based on the symbol value
 
+## Special Curses
+
+- **Three skulls**: The Skull Curse! Half of your gold is distributed evenly to all other players
+- **Two skulls**: The Minor Curse! 33% of your gold is distributed evenly to all other players
+
 ## Installation and Setup
 
 1. Clone the repository
@@ -38,11 +43,21 @@ A Node.js-based slot machine game with a pirate theme, player management, and hi
    ```
    npm install
    ```
-3. Start the server:
+3. (Optional) Seed the high scores with sample data:
+   ```
+   npm run seed
+   ```
+4. Start the server:
    ```
    npm start
    ```
-4. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to `http://localhost:3000`
+
+## Deployment Notes
+
+- The `high-scores.json` file is excluded from version control in `.gitignore` to prevent overwriting player data when deploying or pulling the repository
+- If you're setting up the game for the first time on a new server, run `npm run seed` to initialize the high scores with sample data
+- Player data is stored both in the browser's localStorage and on the server
 
 ## Project Structure
 
